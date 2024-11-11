@@ -7,13 +7,15 @@ const App = () => {
     <>
       <Leva />
       <Canvas
+        dpr={[1, 2]}
         camera={{
           fov: 45,
           near: 0.1,
           far: 200,
-          position: [3, 3, 10],
+          position: [0, 0, 15],
         }}
       >
+        <color attach="background" args={["black"]} />
         <Experience />
       </Canvas>
     </>
