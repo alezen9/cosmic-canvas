@@ -6,6 +6,8 @@ import { ShaderMaterial } from "three";
 export const uniforms = {
   uTime: 0,
   uAnimationSpeed: 1,
+  uBeltFrequency: 0,
+
   uTurbulenceNoiseFrequency: 0,
   uBeltZoneNoiseFrequency: 0,
   uBeltZoneNoiseAmplitude: 0,
@@ -13,20 +15,33 @@ export const uniforms = {
   uBeltZoneInnerEdgeSoftness: 0,
   uBoundaryNoiseFrequency: 0,
   uBoundaryNoiseAmplitude: 0,
+  uBubbleDispersal: 0,
+  uBubbleSizeControl: 0,
 };
 
 const useJupiterControls = (materialRef: RefObject<ShaderMaterial>) => {
   const controls = useControls({
     uAnimationSpeed: {
-      value: 1,
+      // value: 0.1,
+      value: 0.003,
       min: 0.0,
       max: 1.0,
       step: 0.001,
     },
-    uTurbulenceNoiseFrequency: {
-      value: 10,
+    uBeltFrequency: {
+      value: 20,
+      // value: 5.5,
+      // value: 6.6,
+      // value: 6.95,
       min: 0.0,
-      max: 100.0,
+      max: 30.0,
+      step: 0.001,
+    },
+
+    uTurbulenceNoiseFrequency: {
+      value: 200,
+      min: 0.0,
+      max: 200.0,
       step: 0.001,
     },
     uBeltZoneNoiseFrequency: {
@@ -42,13 +57,13 @@ const useJupiterControls = (materialRef: RefObject<ShaderMaterial>) => {
       step: 0.001,
     },
     uBeltZoneOuterEdgeSoftness: {
-      value: 0.04,
+      value: 0.03,
       min: 0.0,
       max: 1.0,
       step: 0.001,
     },
     uBeltZoneInnerEdgeSoftness: {
-      value: 0.02,
+      value: 0.03,
       min: 0.0,
       max: 1.0,
       step: 0.001,
