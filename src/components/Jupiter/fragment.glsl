@@ -11,17 +11,24 @@ varying vec2 vUv;
 
 float getPeriodicNoise() {
     float theta = vUv.x * 2.0 * PI;
-    vec2 periodicCoords = vec2(sin(theta), cos(theta));
-    return simplexNoise2d(periodicCoords + vUv.y * 75.00 + uTime * uAnimationSpeed * 0.01) * 0.2;
+    vec2 periodicCoords = vec2(sin(theta), cos(theta)) * 0.3;
+    return simplexNoise2d(periodicCoords + vUv.y * -35.0 + uTime * uAnimationSpeed * 0.005) * 0.35;
 }
+
 
 float calculateSeamlessWave(float y, int frequency, float amplitude){
     float phase = uTime * uAnimationSpeed * 2.0 * PI;
     
     float wave = sin((vUv.x * float(frequency) * 2.0 * PI) + phase) * amplitude * WAVE_AMPLITUDE_SCALE;
 
-    float noise = getPeriodicNoise();
-    return wave + noise * 5.5 * amplitude * WAVE_AMPLITUDE_SCALE;
+    float baseNoise = getPeriodicNoise();
+
+    float directionalNoise = simplexNoise2d(vUv * 5.0);
+    float directionalFactor = (directionalNoise * 2.0) - 1.0;
+
+    float noise = baseNoise * directionalFactor;
+
+    return wave + baseNoise * 5.5 * amplitude * WAVE_AMPLITUDE_SCALE;
 }
 
 vec3 drawHarmonicWavyStripe(
@@ -37,13 +44,13 @@ vec3 drawHarmonicWavyStripe(
     float wavyFrom = from + bottomEdgeWave;
     float wavyTo = to + topEdgeWave;
 
-    float stripeBlend = step(wavyFrom, y) * (1.0 - step(wavyTo, y));
+    float stripeBlendFactor = step(wavyFrom, y) * (1.0 - step(wavyTo, y));
 
-    return color * stripeBlend;
+    return color * stripeBlendFactor;
 }
 
 void main() {
-    vec3 color = vec3(0.0);
+    vec3 color = vec3(0.05);
     
     // Stripe 1 - #241927 (dark purple-brown)
     color += drawHarmonicWavyStripe(
@@ -103,10 +110,21 @@ void main() {
     // Stripe 6 - #9F3921 (vibrant red-brown)
     color += drawHarmonicWavyStripe(
         0.46,
-        0.52,
+        0.50,
         vec3(0.624, 0.224, 0.129),
         4,
         0.005,
+        3,
+        0.025
+    );
+
+    // Stripe 6.5 - #FFFFFF (white)
+    color += drawHarmonicWavyStripe(
+        0.50,
+        0.52,
+        vec3(0.816, 0.541, 0.357),
+        3,
+        0.025,
         3,
         0.025
     );
