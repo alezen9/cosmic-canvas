@@ -1,36 +1,27 @@
+#include ../../utils/shaders/simplexNoise2d.glsl
+
 #define PI 3.14159265359
 #define WAVE_AMPLITUDE_SCALE 0.2
 
 uniform float uTime;
 uniform float uAnimationSpeed;
 uniform float uRadius;
-uniform sampler2D uNoiseTexture;
-
-uniform u
 
 varying vec2 vUv;
 
-float getNoiseValue() {
-    return texture2D(uNoiseTexture, vUv * 0.03 + uTime * uAnimationSpeed * 0.01).r;
-}
-
 float getPeriodicNoise() {
-    float x = fract(vUv.x * 0.05 * PI * 2.0);
-    vec2 noiseUV = vec2(x, vUv.y * 1.25); // Adjust y-frequency for larger vertical patterns
-    return texture2D(uNoiseTexture, noiseUV + uTime * uAnimationSpeed * 0.1).r;
+    float theta = vUv.x * 2.0 * PI;
+    vec2 periodicCoords = vec2(sin(theta), cos(theta));
+    return simplexNoise2d(periodicCoords + vUv.y * 75.00 + uTime * uAnimationSpeed * 0.01) * 0.2;
 }
 
 float calculateSeamlessWave(float y, int frequency, float amplitude){
-    float latitudeAngle = (y - 0.5) * PI;
-    float circumference = 2.0 * PI * uRadius * cos(latitudeAngle);
-    float periodScale = (2.0 * PI) / circumference;
-
     float phase = uTime * uAnimationSpeed * 2.0 * PI;
     
     float wave = sin((vUv.x * float(frequency) * 2.0 * PI) + phase) * amplitude * WAVE_AMPLITUDE_SCALE;
 
-    float noise = getPeriodicNoise() * 1.5;
-    return wave + noise * 0.3 * amplitude;
+    float noise = getPeriodicNoise();
+    return wave + noise * 5.5 * amplitude * WAVE_AMPLITUDE_SCALE;
 }
 
 vec3 drawHarmonicWavyStripe(
@@ -232,6 +223,6 @@ void main() {
 
     gl_FragColor = vec4(color, 1.0);
 
-    #include <tonemapping_fragment>
-    #include <colorspace_fragment>
+    // #include <tonemapping_fragment>
+    // #include <colorspace_fragment>
 }
