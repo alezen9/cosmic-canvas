@@ -1,3 +1,3 @@
-# Jupiter
+# 🧑🏻‍🚀 Cosmic canvas
 
 Coming soon
