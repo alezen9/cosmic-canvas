@@ -15,20 +15,26 @@ float getPeriodicNoise() {
     return simplexNoise2d(periodicCoords + vUv.y * -35.0 + uTime * uAnimationSpeed * 0.005) * 0.35;
 }
 
-
-float calculateSeamlessWave(float y, int frequency, float amplitude){
-    float phase = uTime * uAnimationSpeed * 2.0 * PI;
+float calculateSeamlessWave(float y, int frequency, float amplitude) {
+    float phaseOffset = uTime * uAnimationSpeed * 2.0 * PI;
     
-    float wave = sin((vUv.x * float(frequency) * 2.0 * PI) + phase) * amplitude * WAVE_AMPLITUDE_SCALE;
+    float primaryWaveFrequency = float(frequency) * 2.0 * PI;
+    float primaryWave = sin((vUv.x * primaryWaveFrequency) + phaseOffset) * amplitude * WAVE_AMPLITUDE_SCALE;
+
+    float theta = vUv.x * 2.0 * PI;
+    float secondaryWaveFrequency = float(frequency) * 1.5;
+    float secondaryWave = sin((cos(theta) * secondaryWaveFrequency) + phaseOffset * 0.005) * amplitude * 0.75 * WAVE_AMPLITUDE_SCALE;
+    
+    float combinedWave = primaryWave + secondaryWave;
 
     float baseNoise = getPeriodicNoise();
-
+    
     float directionalNoise = simplexNoise2d(vUv * 5.0);
     float directionalFactor = (directionalNoise * 2.0) - 1.0;
 
     float noise = baseNoise * directionalFactor;
 
-    return wave + baseNoise * 5.5 * amplitude * WAVE_AMPLITUDE_SCALE;
+    return combinedWave + baseNoise * 5.5 * amplitude * WAVE_AMPLITUDE_SCALE;
 }
 
 vec3 drawHarmonicWavyStripe(
