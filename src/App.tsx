@@ -5,13 +5,13 @@ import { Leva } from "leva";
 const App = () => {
   return (
     <>
-      <Leva />
+      <Leva collapsed />
       <Canvas
         dpr={[1, 2]}
         camera={{
           fov: 45,
           near: 0.1,
-          far: 200,
+          far: 100,
           position: [0, 0, 15],
         }}
       >
