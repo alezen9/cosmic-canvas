@@ -6,10 +6,18 @@ uniform float uAnimationSpeed;
 uniform float uRadius;
 uniform sampler2D uNoiseTexture;
 
+uniform u
+
 varying vec2 vUv;
 
 float getNoiseValue() {
-    return texture2D(uNoiseTexture, vUv * uTime * uAnimationSpeed).r;
+    return texture2D(uNoiseTexture, vUv * 0.03 + uTime * uAnimationSpeed * 0.01).r;
+}
+
+float getPeriodicNoise() {
+    float x = fract(vUv.x * 0.05 * PI * 2.0);
+    vec2 noiseUV = vec2(x, vUv.y * 1.25); // Adjust y-frequency for larger vertical patterns
+    return texture2D(uNoiseTexture, noiseUV + uTime * uAnimationSpeed * 0.1).r;
 }
 
 float calculateSeamlessWave(float y, int frequency, float amplitude){
@@ -21,7 +29,8 @@ float calculateSeamlessWave(float y, int frequency, float amplitude){
     
     float wave = sin((vUv.x * float(frequency) * 2.0 * PI) + phase) * amplitude * WAVE_AMPLITUDE_SCALE;
 
-    return wave;
+    float noise = getPeriodicNoise() * 1.5;
+    return wave + noise * 0.3 * amplitude;
 }
 
 vec3 drawHarmonicWavyStripe(
@@ -223,6 +232,6 @@ void main() {
 
     gl_FragColor = vec4(color, 1.0);
 
-    // #include <tonemapping_fragment>
-    // #include <colorspace_fragment>
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }
