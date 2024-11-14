@@ -14,7 +14,7 @@ const JupiterMaterial = shaderMaterial(
   {
     uTime: 0,
     uAnimationSpeed: 1,
-    uLightPosition: new Vector3(0, 0, LIGHT_ORBIT_RADIUS),
+    uLightPosition: new Vector3(-LIGHT_ORBIT_RADIUS, 0, LIGHT_ORBIT_RADIUS),
   },
   vertexShader,
   fragmentShader,
@@ -33,8 +33,8 @@ const Jupiter = () => {
     if (!meshRef.current) return;
     meshRef.current.rotation.y = time * -0.1;
     if (!materialRef.current) return;
-    const angle = -time * 0.3;
-    const x = Math.cos(angle) * LIGHT_ORBIT_RADIUS;
+    const angle = time * 0.1;
+    const x = Math.cos(angle) * -LIGHT_ORBIT_RADIUS;
     const y = 0;
     const z = Math.sin(angle) * LIGHT_ORBIT_RADIUS;
     materialRef.current.uniforms.uLightPosition.value.set(x, y, z);
