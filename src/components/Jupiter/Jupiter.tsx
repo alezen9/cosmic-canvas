@@ -20,7 +20,7 @@ extend({ JupiterMaterial });
 const SCALE = 3.5;
 const SUBDIVISION = 64;
 
-const TestPlane = () => {
+const Jupiter = () => {
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
 
@@ -39,7 +39,7 @@ const TestPlane = () => {
   );
 };
 
-export default TestPlane;
+export default Jupiter;
 
 const usePatternControls = (materialRef: RefObject<ShaderMaterial>) => {
   const controls = useControls({
