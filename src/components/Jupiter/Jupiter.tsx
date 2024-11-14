@@ -1,74 +1,137 @@
 import { shaderMaterial } from "@react-three/drei";
-import vertexShader from "./vertex.glsl";
-import fragmentShader from "./fragment.glsl";
+import jupiterVertexShader from "./jupiter.vertex.glsl";
+import jupiterFragmentShader from "./jupiter.fragment.glsl";
+import atmosphereVertexShader from "./atmosphere.vertex.glsl";
+import atmosphereFragmentShader from "./atmosphere.fragment.glsl";
 import { extend, useFrame } from "@react-three/fiber";
-import { RefObject, useEffect, useRef } from "react";
-import { Mesh, ShaderMaterial, Vector3 } from "three";
-import { useControls } from "leva";
+import { useRef } from "react";
+import {
+  BackSide,
+  Color,
+  Group,
+  Mesh,
+  ShaderMaterial,
+  SphereGeometry,
+  Spherical,
+  Vector3,
+} from "three";
 
 const PLANET_SCALE = 3.5;
+const ATMOSPHERE_SCALE = PLANET_SCALE + 0.15;
 const PLANET_SUBDIVISION = 64;
-const LIGHT_ORBIT_RADIUS = 50;
+const LIGHT_ORBIT_RADIUS = 25;
 
 const JupiterMaterial = shaderMaterial(
   {
     uTime: 0,
     uAnimationSpeed: 1,
-    uLightPosition: new Vector3(-LIGHT_ORBIT_RADIUS, 0, LIGHT_ORBIT_RADIUS),
+    uSunPosition: new Vector3(0),
   },
-  vertexShader,
-  fragmentShader,
+  jupiterVertexShader,
+  jupiterFragmentShader,
 );
 
-extend({ JupiterMaterial });
+const AtmosphereMaterial = shaderMaterial(
+  {
+    uSunPosition: new Vector3(0),
+    uAtmosphereDayColor: new Color("#d4c6bc"),
+    uAtmosphereTwilightColor: new Color("#ed6509"),
+  },
+  atmosphereVertexShader,
+  atmosphereFragmentShader,
+  (material) => {
+    if (!material) return;
+    material.side = BackSide;
+    material.transparent = true;
+  },
+);
+
+extend({ JupiterMaterial, AtmosphereMaterial });
+
+const sphereGeometry = new SphereGeometry(
+  1,
+  PLANET_SUBDIVISION,
+  PLANET_SUBDIVISION,
+);
 
 const Jupiter = () => {
-  const meshRef = useRef<Mesh>(null);
-  const materialRef = useRef<ShaderMaterial>(null);
-
-  usePatternControls(materialRef);
+  const groupRef = useRef<Group>(null);
+  const planetMaterialRef = useRef<ShaderMaterial>(null);
+  const atmosphereMaterialRef = useRef<ShaderMaterial>(null);
+  const sunRef = useRef<Mesh>(null);
+  const sphericalRef = useRef(
+    new Spherical(LIGHT_ORBIT_RADIUS, Math.PI / 2.25, 0),
+  );
 
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
-    if (!meshRef.current) return;
-    meshRef.current.rotation.y = time * -0.1;
-    if (!materialRef.current) return;
-    const angle = time * 0.1;
-    const x = Math.cos(angle) * -LIGHT_ORBIT_RADIUS;
-    const y = 0;
-    const z = Math.sin(angle) * LIGHT_ORBIT_RADIUS;
-    materialRef.current.uniforms.uLightPosition.value.set(x, y, z);
+    if (
+      !planetMaterialRef.current ||
+      !atmosphereMaterialRef.current ||
+      !groupRef.current ||
+      !sunRef.current
+    )
+      return;
+    // planet rotation
+    groupRef.current.rotation.y = time * -0.2;
+
+    // light position
+    sphericalRef.current.theta = time * 0.1;
+    planetMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
+      sphericalRef.current,
+    );
+    atmosphereMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
+      sphericalRef.current,
+    );
+    sunRef.current.position.setFromSpherical(sphericalRef.current);
   });
 
   return (
-    <mesh ref={meshRef} scale={[PLANET_SCALE, PLANET_SCALE, PLANET_SCALE]}>
-      <sphereGeometry args={[1, PLANET_SUBDIVISION, PLANET_SUBDIVISION]} />
-      <jupiterMaterial ref={materialRef} />
-    </mesh>
+    <>
+      <group ref={groupRef}>
+        <mesh
+          geometry={sphereGeometry}
+          scale={[PLANET_SCALE, PLANET_SCALE, PLANET_SCALE]}
+        >
+          <jupiterMaterial ref={planetMaterialRef} />
+        </mesh>
+        <mesh
+          geometry={sphereGeometry}
+          scale={[ATMOSPHERE_SCALE, ATMOSPHERE_SCALE, ATMOSPHERE_SCALE]}
+        >
+          <atmosphereMaterial ref={atmosphereMaterialRef} />
+        </mesh>
+      </group>
+      <mesh ref={sunRef} scale={0.3}>
+        <icosahedronGeometry args={[1, 3]} />
+        <meshStandardMaterial color="white" />
+        <ambientLight />
+      </mesh>
+    </>
   );
 };
 
 export default Jupiter;
 
-const usePatternControls = (materialRef: RefObject<ShaderMaterial>) => {
-  const controls = useControls({
-    uAnimationSpeed: {
-      value: 0.03,
-      min: 0.0,
-      max: 1.0,
-      step: 0.001,
-    },
-  });
+// const usePatternControls = (materialRef: RefObject<ShaderMaterial>) => {
+//   const controls = useControls({
+//     uAnimationSpeed: {
+//       value: 0.03,
+//       min: 0.0,
+//       max: 1.0,
+//       step: 0.001,
+//     },
+//   });
 
-  useEffect(() => {
-    if (!materialRef.current) return;
-    for (const [name, value] of Object.entries(controls)) {
-      materialRef.current.uniforms[name].value = value;
-    }
-  }, [controls, materialRef]);
+//   useEffect(() => {
+//     if (!materialRef.current) return;
+//     for (const [name, value] of Object.entries(controls)) {
+//       materialRef.current.uniforms[name].value = value;
+//     }
+//   }, [controls, materialRef]);
 
-  useFrame(({ clock }) => {
-    if (!materialRef.current) return;
-    materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-  });
-};
+//   useFrame(({ clock }) => {
+//     if (!materialRef.current) return;
+//     materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
+//   });
+// };

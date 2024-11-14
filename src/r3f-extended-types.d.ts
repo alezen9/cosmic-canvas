@@ -7,6 +7,10 @@ declare global {
         JupiterMaterial,
         typeof JupiterMaterial
       >;
+      atmosphereMaterial: ReactThreeFiber.Object3DNode<
+        AtmosphereMaterial,
+        typeof AtmosphereMaterial
+      >;
     }
   }
 }

@@ -11,7 +11,7 @@
 
 uniform float uTime;            // Time variable to animate the wave motion
 uniform float uAnimationSpeed;  // Controls the speed of wave and noise animation
-uniform vec3 uLightPosition;
+uniform vec3 uSunPosition;
 
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -113,7 +113,8 @@ void main() {
     // Normalize the normal and view direction
     vec3 normal = normalize(vNormal);
     vec3 toCameraDirection = normalize(cameraPosition - vPosition);
-    vec3 toLightDirection = normalize(uLightPosition - vPosition);
+    vec3 toLightDirection = normalize(uSunPosition - vPosition);
+    float sunFacingDirection = dot(uSunPosition, normal);
 
     // Ambient light
     vec3 ambientColor = vec3(1.0);
@@ -132,7 +133,7 @@ void main() {
     // Specular highlight (Blinn-Phong)
     vec3 specularColor = vec3(0.67, 0.54, 0.38);
     float shininessFactor = 16.0;
-    float specularIntensity = 0.5;
+    float specularIntensity = 0.3;
     vec3 halfVector = normalize(toLightDirection + toCameraDirection);
     float specularFactor = pow(max(dot(normal, halfVector), 0.0), shininessFactor);
     vec3 specular = specularColor * specularFactor * specularIntensity;
