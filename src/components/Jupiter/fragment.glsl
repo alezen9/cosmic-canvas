@@ -5,8 +5,11 @@
 
 uniform float uTime;            // Time variable to animate the wave motion
 uniform float uAnimationSpeed;  // Controls the speed of wave and noise animation
+uniform vec3 uLightPosition;
 
 varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPosition;
 
 /**
  * Generates periodic simplex noise to avoid seams on the sphere
@@ -83,8 +86,9 @@ vec3 drawHarmonicWavyStripe(
     return color * stripeBlendFactor;
 }
 
+
 void main() {
-    vec3 color = vec3(0.03); // Brighter base color for tones with slightly higher exposure
+    vec3 color = vec3(0.0);
 
     // Series of stripes with unique colors, frequencies, and amplitudes for each stripe's edge
     color += drawHarmonicWavyStripe(-0.1, 0.2, vec3(0.141, 0.098, 0.153), 0, 0.0, 2, 0.07); // Dark purple-brown
@@ -105,5 +109,41 @@ void main() {
     color += drawHarmonicWavyStripe(0.79, 0.82, vec3(0.988, 0.773, 0.612), 2, 0.02, 3, 0.05); // Soft peach
     color += drawHarmonicWavyStripe(0.82, 1.1, vec3(0.965, 0.749, 0.455), 3, 0.05, 0, 0.0); // Light golden
 
+    // Normalize the normal and view direction
+    vec3 normal = normalize(vNormal);
+    vec3 toCameraDirection = normalize(cameraPosition - vPosition);
+    vec3 toLightDirection = normalize(uLightPosition - vPosition);
+
+    // Ambient light
+    vec3 ambientColor = vec3(1.0);
+    float ambientIntensity = 0.075;
+    vec3 ambientLight = ambientColor * ambientIntensity;
+    
+    // Point lighting
+    vec3 pointLightColor = vec3(1.0);
+    float pointLightIntensity = 1.0;
+    float diffuseFactor = max(dot(normal, toLightDirection), 0.0);
+    vec3 pointLight = pointLightColor * diffuseFactor * pointLightIntensity;
+    
+    // Apply Ambient and Point lights
+    color *= ambientLight + pointLight;
+
+    // Specular highlight (Blinn-Phong)
+    vec3 specularColor = vec3(0.67, 0.54, 0.38);
+    float shininessFactor = 16.0;
+    float specularIntensity = 0.5;
+    vec3 halfVector = normalize(toLightDirection + toCameraDirection);
+    float specularFactor = pow(max(dot(normal, halfVector), 0.0), shininessFactor);
+    vec3 specular = specularColor * specularFactor * specularIntensity;
+    color += specular;
+
+    // Calculate Fresnel effect
+    vec3 fresnelColor = vec3(0.2, 0.13, 0.07);
+    float fresnelStrength = 2.5;
+    float fresnelFactor = pow(1.0 - dot(normal, toCameraDirection), fresnelStrength);
+    vec3 fresnel = fresnelColor * fresnelFactor * 0.5;
+    color += fresnel;
+
     gl_FragColor = vec4(color, 1.0);
+    #include <tonemapping_fragment>
 }
