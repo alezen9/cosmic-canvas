@@ -1,4 +1,4 @@
-import { shaderMaterial } from "@react-three/drei";
+import { shaderMaterial, Stars } from "@react-three/drei";
 import jupiterVertexShader from "./jupiter.vertex.glsl";
 import jupiterFragmentShader from "./jupiter.fragment.glsl";
 import atmosphereVertexShader from "./atmosphere.vertex.glsl";
@@ -9,17 +9,17 @@ import {
   BackSide,
   Color,
   Group,
-  Mesh,
+  Points,
   ShaderMaterial,
   SphereGeometry,
   Spherical,
   Vector3,
 } from "three";
 
-const PLANET_SCALE = 3.5;
+const PLANET_SCALE = 4;
 const ATMOSPHERE_SCALE = PLANET_SCALE + 0.15;
 const PLANET_SUBDIVISION = 64;
-const LIGHT_ORBIT_RADIUS = 25;
+const PLANET_ORBIT_RADIUS = 85;
 
 const JupiterMaterial = shaderMaterial(
   {
@@ -58,80 +58,62 @@ const Jupiter = () => {
   const groupRef = useRef<Group>(null);
   const planetMaterialRef = useRef<ShaderMaterial>(null);
   const atmosphereMaterialRef = useRef<ShaderMaterial>(null);
-  const sunRef = useRef<Mesh>(null);
+  const starfieldRef = useRef<Points>(null);
   const sphericalRef = useRef(
-    new Spherical(LIGHT_ORBIT_RADIUS, Math.PI / 2.25, 0),
+    new Spherical(PLANET_ORBIT_RADIUS, Math.PI / 2, 0),
   );
 
   useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
     if (
+      !groupRef.current ||
       !planetMaterialRef.current ||
       !atmosphereMaterialRef.current ||
-      !groupRef.current ||
-      !sunRef.current
+      !starfieldRef.current
     )
       return;
-    // planet rotation
-    groupRef.current.rotation.y = time * -0.2;
+    const time = clock.getElapsedTime();
+    const planetRevolution = time * 0.01;
+    sphericalRef.current.theta = planetRevolution;
+    starfieldRef.current.rotation.y = planetRevolution;
 
-    // light position
-    sphericalRef.current.theta = time * 0.1;
+    const planetRotation = time * -0.15;
+    groupRef.current.rotation.y = planetRotation;
     planetMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
       sphericalRef.current,
     );
     atmosphereMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
       sphericalRef.current,
     );
-    sunRef.current.position.setFromSpherical(sphericalRef.current);
   });
 
   return (
-    <>
-      <group ref={groupRef}>
+    <group>
+      <group ref={groupRef} name="jupiter">
         <mesh
+          name="planet"
           geometry={sphereGeometry}
           scale={[PLANET_SCALE, PLANET_SCALE, PLANET_SCALE]}
         >
           <jupiterMaterial ref={planetMaterialRef} />
         </mesh>
         <mesh
+          name="atmosphere"
           geometry={sphereGeometry}
           scale={[ATMOSPHERE_SCALE, ATMOSPHERE_SCALE, ATMOSPHERE_SCALE]}
         >
           <atmosphereMaterial ref={atmosphereMaterialRef} />
         </mesh>
       </group>
-      <mesh ref={sunRef} scale={0.3}>
-        <icosahedronGeometry args={[1, 3]} />
-        <meshStandardMaterial color="white" />
-        <ambientLight />
-      </mesh>
-    </>
+      <Stars
+        ref={starfieldRef}
+        radius={15}
+        depth={10}
+        count={200}
+        factor={2.75}
+        fade
+      />
+    </group>
   );
 };
 
 export default Jupiter;
-
-// const usePatternControls = (materialRef: RefObject<ShaderMaterial>) => {
-//   const controls = useControls({
-//     uAnimationSpeed: {
-//       value: 0.03,
-//       min: 0.0,
-//       max: 1.0,
-//       step: 0.001,
-//     },
-//   });
-
-//   useEffect(() => {
-//     if (!materialRef.current) return;
-//     for (const [name, value] of Object.entries(controls)) {
-//       materialRef.current.uniforms[name].value = value;
-//     }
-//   }, [controls, materialRef]);
-
-//   useFrame(({ clock }) => {
-//     if (!materialRef.current) return;
-//     materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-//   });
-// };
