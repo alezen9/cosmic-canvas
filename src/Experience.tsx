@@ -1,11 +1,19 @@
 import { OrbitControls } from "@react-three/drei";
-// import { Perf } from "r3f-perf";
+import { Perf } from "r3f-perf";
 import Jupiter from "./components/Jupiter/Jupiter";
+import { useControls } from "leva";
 
 const Experience = () => {
+  const { isPerformancePanelVisible } = useControls("Monitoring", {
+    isPerformancePanelVisible: {
+      value: true,
+      label: "Show performance",
+    },
+  });
+
   return (
     <>
-      {/* <Perf position="top-left" /> */}
+      {isPerformancePanelVisible && <Perf position="top-left" />}
       <OrbitControls
         makeDefault
         enableDamping

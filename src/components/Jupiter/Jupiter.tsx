@@ -4,7 +4,7 @@ import jupiterFragmentShader from "./jupiter.fragment.glsl";
 import atmosphereVertexShader from "./atmosphere.vertex.glsl";
 import atmosphereFragmentShader from "./atmosphere.fragment.glsl";
 import { extend, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   BackSide,
   Color,
@@ -15,6 +15,7 @@ import {
   Spherical,
   Vector3,
 } from "three";
+import { useControls } from "leva";
 
 const PLANET_SCALE = 4;
 const ATMOSPHERE_SCALE = PLANET_SCALE + 0.15;
@@ -73,18 +74,40 @@ const Jupiter = () => {
       return;
     const time = clock.getElapsedTime();
     const planetRevolution = time * 0.01;
+    const planetRotation = time * -0.15;
+
+    // fake orbit
     sphericalRef.current.theta = planetRevolution;
     starfieldRef.current.rotation.y = planetRevolution;
 
-    const planetRotation = time * -0.15;
+    // planet rotation
     groupRef.current.rotation.y = planetRotation;
+
+    // sunlight
     planetMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
       sphericalRef.current,
     );
     atmosphereMaterialRef.current.uniforms.uSunPosition.value.setFromSpherical(
       sphericalRef.current,
     );
+
+    // planet pattern rotation animation
+    planetMaterialRef.current.uniforms.uTime.value = time;
   });
+
+  const { uAnimationSpeed } = useControls("Planet", {
+    uAnimationSpeed: {
+      value: 0.05,
+      min: -3,
+      max: 3,
+      label: "Animation speed",
+    },
+  });
+
+  useEffect(() => {
+    if (!planetMaterialRef.current) return;
+    planetMaterialRef.current.uniforms.uAnimationSpeed.value = uAnimationSpeed;
+  }, [uAnimationSpeed]);
 
   return (
     <group>

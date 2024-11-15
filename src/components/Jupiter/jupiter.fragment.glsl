@@ -5,9 +5,9 @@
 #define SECONDARY_WAVE_FREQUENCY_SCALE 1.5 // Secondary wave frequency; higher adds finer detail.
 #define SECONDARY_WAVE_AMPLITUDE_SCALE 0.15 // Secondary wave height; higher makes secondary wave more noticeable.
 #define DIRECTIONAL_NOISE_GRANULARITY 5.5 // Detail of directional noise; higher gives finer noise texture.
-#define NOISE_DENSITY -35.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
+#define NOISE_DENSITY -40.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
 #define NOISE_INTENSITY 0.35 // Overall noise strength; higher increases noise visibility.
-#define NOISE_SPREAD 0.3 // Noise spread; higher values make noise pattern broader.
+#define NOISE_SPREAD 1.0 // Noise spread; higher values make noise pattern broader.
 
 uniform float uTime;            // Time variable to animate the wave motion
 uniform float uAnimationSpeed;  // Controls the speed of wave and noise animation
@@ -50,7 +50,7 @@ float calculateSeamlessWave(float y, int frequency, float amplitude) {
     float combinedWave = primaryWave + secondaryWave;
 
     // Add directional noise for organic irregularity in wave pattern
-    float baseNoise = getPeriodicNoise();
+    float baseNoise = getPeriodicNoise() * y;
     float directionalNoise = simplexNoise2d(vUv * 5.0); // Additional noise to vary the wave direction
     float directionalFactor = (directionalNoise * 2.0) - 1.0; // Map `directionalNoise` to range [-1, 1]
     float noise = baseNoise * directionalFactor;

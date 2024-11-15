@@ -5,14 +5,16 @@ import { Leva } from "leva";
 const App = () => {
   return (
     <>
-      <Leva collapsed />
+      <div className="leva-wrapper">
+        <Leva />
+      </div>
       <Canvas
         dpr={[1, 2]}
         camera={{
           fov: 45,
           near: 0.1,
           far: 100,
-          position: [10, 10, 10],
+          position: [20, 7.5, 15],
         }}
       >
         <Experience />
