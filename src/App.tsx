@@ -15,7 +15,6 @@ const App = () => {
           position: [0, 0, 15],
         }}
       >
-        <color attach="background" args={["black"]} />
         <Experience />
       </Canvas>
     </>
