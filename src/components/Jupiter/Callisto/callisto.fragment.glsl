@@ -6,7 +6,7 @@
 #define SECONDARY_WAVE_AMPLITUDE_SCALE 0.75 // Secondary wave height; higher makes secondary wave more noticeable.
 #define DIRECTIONAL_NOISE_GRANULARITY 0.5 // Detail of directional noise; higher gives finer noise texture.
 #define NOISE_DENSITY 7.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
-#define NOISE_INTENSITY 3.35 // Overall noise strength; higher increases noise visibility.
+#define NOISE_INTENSITY 10.35 // Overall noise strength; higher increases noise visibility.
 #define NOISE_SPREAD 2.0 // Noise spread; higher values make noise pattern broader.
 
 uniform float uTime;            // Time variable to animate the wave motion
@@ -92,8 +92,9 @@ void main() {
     vec3 color = vec3(0.0);
 
     // Series of stripes with unique colors, frequencies, and amplitudes for each stripe's edge
-    color += drawHarmonicWavyStripe(-0.1, 0.5, vec3(0.42, 0.41, 0.38), 0, 0.0, 2, 0.07); // Dark purple-brown
-    color += drawHarmonicWavyStripe(0.5, 1.5, vec3(0.29, 0.28, 0.26), 2, 0.07, 2, 0.03); // Dark reddish-brown
+    color += drawHarmonicWavyStripe(-0.1, 0.33, vec3(0.11, 0.09, 0.03), 0, 0.0, 2, 0.07); // Dark purple-brown
+    color += drawHarmonicWavyStripe(-0.33, 0.66, vec3(0.09, 0.06, 0.03), 0, 0.0, 2, 0.07); // Dark purple-brown
+    color += drawHarmonicWavyStripe(0.66, 1.5, vec3(0.11, 0.09, 0.02), 2, 0.07, 2, 0.03); // Dark reddish-brown
 
     // Normalize the normal and view direction
     vec3 normal = normalize(vNormal);

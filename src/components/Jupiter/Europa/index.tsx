@@ -19,7 +19,7 @@ const uniforms = {
 };
 
 const SCALE = 0.2;
-const ORBIT_RADIUS = 30;
+const ORBIT_RADIUS = 27.5;
 
 type Props = {
   geometry: SphereGeometry;
@@ -33,7 +33,7 @@ export type EuropaRef = {
 const Europa = forwardRef<EuropaRef, Props>((props, outerRef) => {
   const { geometry, position } = props;
   const ref = useRef<Mesh<SphereGeometry, ShaderMaterial>>(null);
-  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, Math.PI));
+  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, -1));
 
   useImperativeHandle(
     outerRef,
@@ -55,7 +55,7 @@ const Europa = forwardRef<EuropaRef, Props>((props, outerRef) => {
   });
 
   return (
-    <Trail color="white" width={1} length={150} attenuation={(w) => w * w}>
+    <Trail color="white" width={0.5} length={150} attenuation={(w) => w * w}>
       <mesh
         name="europa"
         ref={ref}

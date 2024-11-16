@@ -1,13 +1,14 @@
 import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Group, Mesh, Points, SphereGeometry, Spherical, Vector3 } from "three";
-import Io, { IoRef } from "./Io";
+import { useControls } from "leva";
 import Atmosphere, { AtmosphereRef } from "./Atmosphere";
 import Planet, { PlanetRef } from "./Planet";
-import { useControls } from "leva";
+import Io, { IoRef } from "./Io";
 import Europa, { EuropaRef } from "./Europa";
-import Ganymede from "./Ganymede";
+import Ganymede, { GanymedeRef } from "./Ganymede";
+import Callisto, { CallistoRef } from "./Callisto";
 
 const PLANET_SCALE = 4;
 const SPHERE_SUBDIVISION = 64;
@@ -25,7 +26,8 @@ const Jupiter = () => {
   const atmosphere = useRef<AtmosphereRef>(null);
   const io = useRef<IoRef>(null);
   const europa = useRef<EuropaRef>(null);
-  const ganymede = useRef<EuropaRef>(null);
+  const ganymede = useRef<GanymedeRef>(null);
+  const callisto = useRef<CallistoRef>(null);
 
   const starfield = useRef<Points>(null);
   const sun = useRef<Mesh>(null);
@@ -59,16 +61,14 @@ const Jupiter = () => {
     // sunlight
     const sunPosition = new Vector3();
     sunPosition.setFromSpherical(sunSpherical.current);
-
     sun.current.position.copy(sunPosition.multiplyScalar(2));
     planet.current?.updateSunPositionUniform(sunPosition);
     atmosphere.current?.updateSunPositionUniform(sunPosition);
     io.current?.updateSunPositionUniform(sunPosition);
     europa.current?.updateSunPositionUniform(sunPosition);
     ganymede.current?.updateSunPositionUniform(sunPosition);
+    callisto.current?.updateSunPositionUniform(sunPosition);
   });
-
-  useEffect(() => {}, []);
 
   return (
     <group>
@@ -83,6 +83,7 @@ const Jupiter = () => {
       <Io ref={io} geometry={sphereGeometry} />
       <Europa ref={europa} geometry={sphereGeometry} />
       <Ganymede ref={ganymede} geometry={sphereGeometry} />
+      <Callisto ref={callisto} geometry={sphereGeometry} />
       <Stars
         ref={starfield}
         radius={SUN_DISTANCE - 10}

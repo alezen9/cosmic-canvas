@@ -19,7 +19,7 @@ const uniforms = {
 };
 
 const SCALE = 0.3;
-const ORBIT_RADIUS = 50;
+const ORBIT_RADIUS = 47.5;
 
 type Props = {
   geometry: SphereGeometry;
@@ -32,7 +32,7 @@ export type GanymedeRef = {
 const Ganymede = forwardRef<GanymedeRef, Props>((props, outerRef) => {
   const { geometry } = props;
   const ref = useRef<Mesh<SphereGeometry, ShaderMaterial>>(null);
-  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, 0));
+  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, 3.8));
 
   useImperativeHandle(
     outerRef,
@@ -54,7 +54,7 @@ const Ganymede = forwardRef<GanymedeRef, Props>((props, outerRef) => {
   });
 
   return (
-    <Trail color="white" width={1} length={100} attenuation={(w) => w * w}>
+    <Trail color="white" width={0.5} length={100} attenuation={(w) => w * w}>
       <mesh
         name="ganymede"
         ref={ref}
