@@ -1,12 +1,12 @@
 import { OrbitControls } from "@react-three/drei";
 import { Perf } from "r3f-perf";
-import Jupiter from "./components/Jupiter/Jupiter";
+import Jupiter from "./components/Jupiter";
 import { useControls } from "leva";
 
 const Experience = () => {
   const { isPerformancePanelVisible } = useControls("Monitoring", {
     isPerformancePanelVisible: {
-      value: true,
+      value: false,
       label: "Show performance",
     },
   });

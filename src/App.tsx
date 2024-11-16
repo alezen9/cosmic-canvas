@@ -6,7 +6,7 @@ const App = () => {
   return (
     <>
       <div className="leva-wrapper">
-        <Leva />
+        <Leva collapsed />
       </div>
       <Canvas
         dpr={[1, 2]}

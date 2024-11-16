@@ -1,13 +1,13 @@
-#include ../../utils/shaders/simplexNoise2d.glsl
+#include ../../../utils/shaders/simplexNoise2d.glsl
 
 #define PI 3.14159265359
-#define PRIMARY_WAVE_AMPLITUDE_SCALE 0.2 // Primary wave height; higher makes oscillations stronger.
-#define SECONDARY_WAVE_FREQUENCY_SCALE 1.5 // Secondary wave frequency; higher adds finer detail.
-#define SECONDARY_WAVE_AMPLITUDE_SCALE 0.15 // Secondary wave height; higher makes secondary wave more noticeable.
-#define DIRECTIONAL_NOISE_GRANULARITY 5.5 // Detail of directional noise; higher gives finer noise texture.
-#define NOISE_DENSITY -40.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
-#define NOISE_INTENSITY 0.35 // Overall noise strength; higher increases noise visibility.
-#define NOISE_SPREAD 1.0 // Noise spread; higher values make noise pattern broader.
+#define PRIMARY_WAVE_AMPLITUDE_SCALE 0.5 // Primary wave height; higher makes oscillations stronger.
+#define SECONDARY_WAVE_FREQUENCY_SCALE 0.5 // Secondary wave frequency; higher adds finer detail.
+#define SECONDARY_WAVE_AMPLITUDE_SCALE 1.75 // Secondary wave height; higher makes secondary wave more noticeable.
+#define DIRECTIONAL_NOISE_GRANULARITY 1.5 // Detail of directional noise; higher gives finer noise texture.
+#define NOISE_DENSITY 15.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
+#define NOISE_INTENSITY 15.35 // Overall noise strength; higher increases noise visibility.
+#define NOISE_SPREAD 2.0 // Noise spread; higher values make noise pattern broader.
 
 uniform float uTime;            // Time variable to animate the wave motion
 uniform float uAnimationSpeed;  // Controls the speed of wave and noise animation
@@ -92,23 +92,11 @@ void main() {
     vec3 color = vec3(0.0);
 
     // Series of stripes with unique colors, frequencies, and amplitudes for each stripe's edge
-    color += drawHarmonicWavyStripe(-0.1, 0.2, vec3(0.141, 0.098, 0.153), 0, 0.0, 2, 0.07); // Dark purple-brown
-    color += drawHarmonicWavyStripe(0.2, 0.375, vec3(0.251, 0.102, 0.098), 2, 0.07, 2, 0.03); // Dark reddish-brown
-    color += drawHarmonicWavyStripe(0.375, 0.41, vec3(0.459, 0.220, 0.118), 2, 0.03, 3, 0.05); // Warm brown
-    color += drawHarmonicWavyStripe(0.41, 0.44, vec3(0.518, 0.314, 0.212), 3, 0.05, 1, 0.015); // Earthy brown
-    color += drawHarmonicWavyStripe(0.44, 0.46, vec3(0.537, 0.255, 0.129), 1, 0.015, 4, 0.005); // Deep red-brown
-    color += drawHarmonicWavyStripe(0.46, 0.50, vec3(0.624, 0.224, 0.129), 4, 0.005, 3, 0.025); // Vibrant red-brown
-    color += drawHarmonicWavyStripe(0.50, 0.52, vec3(0.816, 0.541, 0.357) * 0.9, 3, 0.025, 3, 0.025); // Thin orange
-    color += drawHarmonicWavyStripe(0.52, 0.58, vec3(0.725, 0.408, 0.231), 3, 0.025, 1, 0.03); // Warm orange-brown
-    color += drawHarmonicWavyStripe(0.58, 0.59, vec3(0.816, 0.541, 0.357), 1, 0.03, 1, 0.02); // Light orange-brown
-    color += drawHarmonicWavyStripe(0.59, 0.61, vec3(0.918, 0.659, 0.486), 1, 0.02, 5, 0.02); // Pale orange
-    color += drawHarmonicWavyStripe(0.61, 0.66, vec3(0.855, 0.388, 0.161), 5, 0.02, 2, 0.04); // Bright orange-brown
-    color += drawHarmonicWavyStripe(0.66, 0.71, vec3(0.933, 0.498, 0.196), 2, 0.04, 3, 0.06); // Light orange
-    color += drawHarmonicWavyStripe(0.71, 0.75, vec3(0.973, 0.612, 0.294), 3, 0.06, 2, 0.04); // Vibrant light orange
-    color += drawHarmonicWavyStripe(0.75, 0.77, vec3(0.863, 0.361, 0.216), 2, 0.04, 4, 0.015); // Red-orange
-    color += drawHarmonicWavyStripe(0.77, 0.79, vec3(0.988, 0.714, 0.514), 4, 0.015, 2, 0.02); // Light peach-orange
-    color += drawHarmonicWavyStripe(0.79, 0.82, vec3(0.988, 0.773, 0.612), 2, 0.02, 3, 0.05); // Soft peach
-    color += drawHarmonicWavyStripe(0.82, 1.1, vec3(0.965, 0.749, 0.455), 3, 0.05, 0, 0.0); // Light golden
+    color += drawHarmonicWavyStripe(-0.1, 0.15, vec3(0.494, 0.384, 0.157), 0, 0.0, 2, 0.07); // Dark purple-brown
+    color += drawHarmonicWavyStripe(0.15, 0.35, vec3(0.667, 0.643, 0.302), 2, 0.07, 2, 0.03); // Dark reddish-brown
+    color += drawHarmonicWavyStripe(0.35, 0.65, vec3(1.0, 0.980, 0.596), 2, 0.03, 3, 0.05); // Warm brown
+    color += drawHarmonicWavyStripe(0.65, 0.85, vec3(0.667, 0.643, 0.302), 3, 0.05, 1, 0.015); // Earthy brown
+    color += drawHarmonicWavyStripe(0.85, 1.1, vec3(0.494, 0.384, 0.157), 1, 0.015, 4, 0.005); // Deep red-brown
 
     // Normalize the normal and view direction
     vec3 normal = normalize(vNormal);
@@ -147,5 +135,4 @@ void main() {
     color += fresnel;
 
     gl_FragColor = vec4(color, 1.0);
-    #include <tonemapping_fragment>
 }
