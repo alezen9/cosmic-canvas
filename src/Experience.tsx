@@ -6,7 +6,7 @@ import { useControls } from "leva";
 const Experience = () => {
   const { isPerformancePanelVisible } = useControls("Monitoring", {
     isPerformancePanelVisible: {
-      value: false,
+      value: true,
       label: "Show performance",
     },
   });
@@ -17,7 +17,7 @@ const Experience = () => {
       <OrbitControls
         makeDefault
         enableDamping
-        maxDistance={80}
+        maxDistance={160}
         minDistance={11}
         enablePan={false}
       />

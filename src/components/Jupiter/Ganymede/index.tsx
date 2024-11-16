@@ -6,34 +6,33 @@ import {
   Uniform,
   Vector3,
 } from "three";
-import vertexShader from "./io.vertex.glsl";
-import fragmentShader from "./io.fragment.glsl";
+import vertexShader from "./ganymede.vertex.glsl";
+import fragmentShader from "./ganymede.fragment.glsl";
 import { useFrame } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { Trail } from "@react-three/drei";
 
 const uniforms = {
   uTime: new Uniform(0),
-  uAnimationSpeed: new Uniform(2.1),
+  uAnimationSpeed: new Uniform(0.03),
   uSunPosition: new Uniform(new Vector3(0)),
 };
 
-const SCALE = 0.05;
-const ORBIT_RADIUS = 13;
+const SCALE = 0.3;
+const ORBIT_RADIUS = 50;
 
 type Props = {
   geometry: SphereGeometry;
-  position?: Mesh["position"];
 };
 
-export type IoRef = {
+export type GanymedeRef = {
   updateSunPositionUniform: (sunPosition: Vector3) => void;
 };
 
-const Io = forwardRef<IoRef, Props>((props, outerRef) => {
-  const { geometry, position } = props;
+const Ganymede = forwardRef<GanymedeRef, Props>((props, outerRef) => {
+  const { geometry } = props;
   const ref = useRef<Mesh<SphereGeometry, ShaderMaterial>>(null);
-  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, Math.PI / 4));
+  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, 0));
 
   useImperativeHandle(
     outerRef,
@@ -49,18 +48,17 @@ const Io = forwardRef<IoRef, Props>((props, outerRef) => {
   useFrame(({ clock }, delta) => {
     if (!ref.current) return;
     const time = clock.getElapsedTime();
-    orbit.current.theta += delta * 0.2;
+    orbit.current.theta += delta * 0.1;
     ref.current.material.uniforms.uTime.value = time;
     ref.current.position.setFromSpherical(orbit.current);
   });
 
   return (
-    <Trail color="white" width={1} length={200} attenuation={(w) => w * w}>
+    <Trail color="white" width={1} length={100} attenuation={(w) => w * w}>
       <mesh
-        name="io"
+        name="ganymede"
         ref={ref}
         geometry={geometry}
-        position={position}
         scale={[SCALE, SCALE, SCALE]}
       >
         <shaderMaterial
@@ -73,4 +71,4 @@ const Io = forwardRef<IoRef, Props>((props, outerRef) => {
   );
 });
 
-export default Io;
+export default Ganymede;

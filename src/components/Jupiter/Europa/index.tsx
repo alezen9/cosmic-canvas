@@ -10,6 +10,7 @@ import vertexShader from "./europa.vertex.glsl";
 import fragmentShader from "./europa.fragment.glsl";
 import { useFrame } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Trail } from "@react-three/drei";
 
 const uniforms = {
   uTime: new Uniform(0),
@@ -54,19 +55,21 @@ const Europa = forwardRef<EuropaRef, Props>((props, outerRef) => {
   });
 
   return (
-    <mesh
-      name="europa"
-      ref={ref}
-      geometry={geometry}
-      position={position}
-      scale={[SCALE, SCALE, SCALE]}
-    >
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-      />
-    </mesh>
+    <Trail color="white" width={1} length={150} attenuation={(w) => w * w}>
+      <mesh
+        name="europa"
+        ref={ref}
+        geometry={geometry}
+        position={position}
+        scale={[SCALE, SCALE, SCALE]}
+      >
+        <shaderMaterial
+          uniforms={uniforms}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+        />
+      </mesh>
+    </Trail>
   );
 });
 
