@@ -6,33 +6,33 @@ import {
   Uniform,
   Vector3,
 } from "three";
-import vertexShader from "./io.vertex.glsl";
-import fragmentShader from "./io.fragment.glsl";
+import vertexShader from "./europa.vertex.glsl";
+import fragmentShader from "./europa.fragment.glsl";
 import { useFrame } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
 const uniforms = {
   uTime: new Uniform(0),
-  uAnimationSpeed: new Uniform(2.1),
+  uAnimationSpeed: new Uniform(0.1),
   uSunPosition: new Uniform(new Vector3(0)),
 };
 
-const SCALE = 0.05;
-const ORBIT_RADIUS = 13;
+const SCALE = 0.2;
+const ORBIT_RADIUS = 30;
 
 type Props = {
   geometry: SphereGeometry;
   position?: Mesh["position"];
 };
 
-export type IoRef = {
+export type EuropaRef = {
   updateSunPositionUniform: (sunPosition: Vector3) => void;
 };
 
-const Io = forwardRef<IoRef, Props>((props, outerRef) => {
+const Europa = forwardRef<EuropaRef, Props>((props, outerRef) => {
   const { geometry, position } = props;
   const ref = useRef<Mesh<SphereGeometry, ShaderMaterial>>(null);
-  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, Math.PI / 4));
+  const orbit = useRef(new Spherical(ORBIT_RADIUS, Math.PI / 2, Math.PI));
 
   useImperativeHandle(
     outerRef,
@@ -48,14 +48,14 @@ const Io = forwardRef<IoRef, Props>((props, outerRef) => {
   useFrame(({ clock }, delta) => {
     if (!ref.current) return;
     const time = clock.getElapsedTime();
-    orbit.current.theta += delta * 0.2;
+    orbit.current.theta += delta * 0.1;
     ref.current.material.uniforms.uTime.value = time;
     ref.current.position.setFromSpherical(orbit.current);
   });
 
   return (
     <mesh
-      name="io"
+      name="europa"
       ref={ref}
       geometry={geometry}
       position={position}
@@ -70,4 +70,4 @@ const Io = forwardRef<IoRef, Props>((props, outerRef) => {
   );
 });
 
-export default Io;
+export default Europa;

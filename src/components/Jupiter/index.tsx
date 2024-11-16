@@ -6,6 +6,7 @@ import Io, { IoRef } from "./Io";
 import Atmosphere, { AtmosphereRef } from "./Atmosphere";
 import Planet, { PlanetRef } from "./Planet";
 import { useControls } from "leva";
+import Europa, { EuropaRef } from "./Europa";
 
 const PLANET_SCALE = 4;
 const SPHERE_SUBDIVISION = 64;
@@ -22,6 +23,7 @@ const Jupiter = () => {
   const planet = useRef<PlanetRef>(null);
   const atmosphere = useRef<AtmosphereRef>(null);
   const io = useRef<IoRef>(null);
+  const europa = useRef<EuropaRef>(null);
 
   const starfieldRef = useRef<Points>(null);
   const sunSpherical = useRef(
@@ -58,10 +60,11 @@ const Jupiter = () => {
     planet.current?.updateSunPositionUniform(sunPosition);
     atmosphere.current?.updateSunPositionUniform(sunPosition);
     io.current?.updateSunPositionUniform(sunPosition);
+    europa.current?.updateSunPositionUniform(sunPosition);
   });
 
   return (
-    <group>
+    <group rotation-x={0.055}>
       <group ref={jupiter} name="jupiter">
         <Planet ref={planet} geometry={sphereGeometry} scale={PLANET_SCALE} />
         <Atmosphere
@@ -70,10 +73,11 @@ const Jupiter = () => {
           scale={PLANET_SCALE + 0.15}
         />
       </group>
-      <Io ref={io} geometry={sphereGeometry} position={new Vector3(7, 0, 4)} />
+      <Io ref={io} geometry={sphereGeometry} />
+      <Europa ref={europa} geometry={sphereGeometry} />
       <Stars
         ref={starfieldRef}
-        radius={15}
+        radius={35}
         depth={10}
         count={200}
         factor={2.75}

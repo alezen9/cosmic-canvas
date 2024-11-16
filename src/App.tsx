@@ -9,14 +9,14 @@ const App = () => {
   return (
     <>
       <div className="leva-wrapper">
-        <Leva collapsed hidden={!isDebug} />
+        <Leva hidden={!isDebug} />
       </div>
       <Canvas
         dpr={[1, 2]}
         camera={{
           fov: 45,
           near: 0.1,
-          far: 100,
+          far: 200,
           position: [20, 7.5, 15],
         }}
       >
