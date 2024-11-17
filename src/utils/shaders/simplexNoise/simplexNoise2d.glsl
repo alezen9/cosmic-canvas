@@ -1,5 +1,6 @@
-// Simplex 2D noise
-//
+// Simplex Noise function by Stefan Gustavson
+// Licensed under the MIT License (see LICENSE file in this directory).
+
 vec3 permute(vec3 x) { return mod(((x*44.0)+1.0)*x, 299.0); }
 
 float simplexNoise2d(vec2 v)

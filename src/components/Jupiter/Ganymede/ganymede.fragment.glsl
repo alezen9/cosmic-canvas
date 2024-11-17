@@ -1,4 +1,4 @@
-#include ../../../utils/shaders/simplexNoise2d.glsl
+#include ../../../utils/shaders/simplexNoise/simplexNoise2d.glsl
 
 #define PI 3.14159265359
 #define PRIMARY_WAVE_AMPLITUDE_SCALE 2.5 // Primary wave height; higher makes oscillations stronger.
