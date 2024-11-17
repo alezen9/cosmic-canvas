@@ -17,26 +17,12 @@ vec3 drawStripe(vec3 color, float from, float to){
     return color * step(from + noise, vUv.y) * (1.0 - step(to + noise, vUv.y));
 }
 
-vec3 drawInnerStripe(vec3 baseColor, vec3 stripeColor, float from, float to){
-    float noise = getNoise() * 0.1;
-    float factor = step(from + noise, vUv.y) * (1.0 - step(to + noise, vUv.y));
-    return mix(baseColor, stripeColor, factor);
-}
-
 vec3 drawEllipsis(vec3 baseColor, vec3 ellipseColor, vec2 position, float width, float height) {
-    // Calculate the distance of the current UV from the ellipse center
     vec2 dist = vUv - position;
-
-    // Normalize the distance using the ellipse's dimensions (width and height)
     float normalizedDistance = (dist.x * dist.x) / (width * width) + (dist.y * dist.y) / (height * height);
-
     float noise = getNoise();
     normalizedDistance += noise * 2.0;
-
-    // If the normalized distance is <= 1.0, the fragment is inside the ellipse
     float inside = step(normalizedDistance, 1.0);
-
-    // Mix the base color and the ellipse color based on the inside mask
     return mix(baseColor, ellipseColor, inside);
 }
 
