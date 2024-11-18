@@ -10,7 +10,7 @@ import Europa, { EuropaRef } from "./Europa";
 import Ganymede, { GanymedeRef } from "./Ganymede";
 import Callisto, { CallistoRef } from "./Callisto";
 
-const PLANET_SCALE = 4;
+const PLANET_SCALE = 7;
 const SPHERE_SUBDIVISION = 64;
 const SUN_DISTANCE = 90;
 
@@ -89,7 +89,7 @@ const Jupiter = () => {
         radius={SUN_DISTANCE - 10}
         depth={10}
         count={100}
-        factor={7}
+        factor={10}
         fade
       />
       <mesh ref={sun} geometry={sphereGeometry}>

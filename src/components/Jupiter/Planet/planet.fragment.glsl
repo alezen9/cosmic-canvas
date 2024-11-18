@@ -1,124 +1,114 @@
 #include ../../../utils/shaders/simplexNoise/simplexNoise2d.glsl
 
 #define PI 3.14159265359
-// #define PRIMARY_WAVE_AMPLITUDE_SCALE 0.2 // Primary wave height; higher makes oscillations stronger.
-// #define SECONDARY_WAVE_FREQUENCY_SCALE 1.5 // Secondary wave frequency; higher adds finer detail.
-// #define SECONDARY_WAVE_AMPLITUDE_SCALE 0.15 // Secondary wave height; higher makes secondary wave more noticeable.
-// #define DIRECTIONAL_NOISE_GRANULARITY 5.5 // Detail of directional noise; higher gives finer noise texture.
-// #define NOISE_DENSITY -40.0 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
-// #define NOISE_INTENSITY 0.35 // Overall noise strength; higher increases noise visibility.
-// #define NOISE_SPREAD 1.0 // Noise spread; higher values make noise pattern broader.
-
-
-uniform float uPrimaryWaveAmplitudeScale;
-uniform float uSecondaryWaveFrequencyScale;
-uniform float uSecondaryWaveAmplitudeScale;
-uniform float uDirectionalNoiseGranularity;
-uniform float uNoiseDensity;
-uniform float uNoiseIntensity;
-uniform float uNoiseSpread;
-
-
-uniform float uTime;            // Time variable to animate the wave motion
-uniform float uAnimationSpeed;  // Controls the speed of wave and noise animation
-uniform vec3 uSunPosition;
+// #define NOISE_DENSITY 0.5 // Vertical noise frequency; higher magnitude makes noise pattern denser vertically.
+// #define NOISE_INTENSITY 0.1 // Overall noise strength; higher increases noise visibility.
+// #define NOISE_SPREAD 50.5 // Noise spread; higher values make noise pattern broader.
 
 varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vPosition;
 
-/**
- * Generates seamless simplex noise for the sphere by mapping `vUv.x` to circular coordinates and `vUv.y` to latitude
- * @returns periodic noise scaled by uNoiseIntensity.
- */
-float getPeriodicNoise() {
-    float theta = vUv.x * 2.0 * PI; // Map `vUv.x` to a circular angle (0 to 2π)
-    vec2 periodicCoords = vec2(sin(theta), cos(theta)) * uNoiseSpread; // Circular coordinates for seamless noise
-    float offset = uTime * uAnimationSpeed * 0.005; // Time-based offset for animation
-    return simplexNoise2d(periodicCoords + vUv.y * uNoiseDensity + offset) * uNoiseIntensity;
-}
+uniform vec3 uSunPosition;
+uniform float uTime;
+uniform float uAnimationSpeed;
+uniform float uNoiseDensity;
+uniform float uNoiseIntensity;
+uniform float uNoiseSpread;
 
-/**
- * Generates a seamless, organic wave by combining primary and secondary sine waves with noise
- * @param y Vertical position (latitude)
- * @param frequency Wave frequency
- * @param amplitude Wave amplitude
- * @returns Combined wave with noise for organic variation
- */
-float calculateSeamlessWave(float y, int frequency, float amplitude) {
-    float phaseOffset = uTime * uAnimationSpeed * 2.0 * PI; // Time-based phase shift for animation
+float getNoise() {
+    float theta = vUv.x * 2.0 * PI; 
+    float phi = vUv.y * PI;
 
-    // Primary sine wave based on `vUv.x` and frequency
-    float primaryWaveFrequency = float(frequency) * 2.0 * PI;
-    float primaryWave = sin((vUv.x * primaryWaveFrequency) + phaseOffset) * amplitude * uPrimaryWaveAmplitudeScale;
 
-    // Secondary sine wave with cosine for smoother transitions
-    float theta = vUv.x * 2.0 * PI;
-    float secondaryWaveFrequency = float(frequency) * uSecondaryWaveFrequencyScale;
-    float secondaryWave = sin((cos(theta) * secondaryWaveFrequency) + phaseOffset * 0.005) * amplitude * uSecondaryWaveAmplitudeScale;
+    // Map UVs to spherical coordinates for seamless noise
+    // - theta: Horizontal (azimuthal) angle, wraps around the sphere
+    // - phi: Vertical (polar) angle, scales horizontal noise contribution
+    // - cos(phi): Ensures uniform scaling of both X (sin(theta)) and Y (cos(theta)),
+    //   shrinking contributions near the poles to avoid seams and distortions.
+    vec2 periodicCoords = vec2(
+        sin(theta) * cos(phi),
+        cos(theta) * cos(phi)
+    ) * uNoiseSpread;
 
-    float combinedWave = primaryWave + secondaryWave;
+    float offset = uTime * uAnimationSpeed * 0.5;
 
-    // Add directional noise for organic irregularity in wave pattern
-    float baseNoise = getPeriodicNoise() * y;
-    float directionalNoise = simplexNoise2d(vUv * 5.0); // Additional noise to vary the wave direction
-    float directionalFactor = (directionalNoise * 2.0) - 1.0; // Map `directionalNoise` to range [-1, 1]
-    float noise = baseNoise * directionalFactor;
+    float baseNoise = simplexNoise2d(periodicCoords + vUv.y * uNoiseDensity + offset);
 
-    return combinedWave + baseNoise * uDirectionalNoiseGranularity * amplitude * uPrimaryWaveAmplitudeScale;
-}
+    float finerNoise = simplexNoise2d(periodicCoords * 2.0 + vUv.y * uNoiseDensity + offset * 0.5);
 
-/**
- * Draws a wavy stripe between two vertical positions with specified color and wave properties.
- * @param from Start vertical position
- * @param to End vertical position
- * @param color Stripe color
- * @param bottomWaveFrequency Wave frequency at bottom edge
- * @param bottomWaveAmplitude Wave amplitude at bottom edge
- * @param topWaveFrequency Wave frequency at top edge
- * @param topWaveAmplitude Wave amplitude at top edge
- * @returns Stripe color with wave-based transparency for blending
- */
-vec3 drawHarmonicWavyStripe(
-    float from, float to, vec3 color,
-    int bottomWaveFrequency, float bottomWaveAmplitude,
-    int topWaveFrequency, float topWaveAmplitude
-) {
-    float y = vUv.y;
-
-    float bottomEdgeWave = calculateSeamlessWave(from, bottomWaveFrequency, bottomWaveAmplitude);
-    float topEdgeWave = calculateSeamlessWave(to, topWaveFrequency, topWaveAmplitude);
-
-    float wavyFrom = from + bottomEdgeWave;
-    float wavyTo = to + topEdgeWave;
-
-    float stripeBlendFactor = step(wavyFrom, y) * (1.0 - step(wavyTo, y));
-
-    return color * stripeBlendFactor;
+    return (baseNoise + finerNoise * 0.5) * uNoiseIntensity;
 }
 
 
-void main() {
+vec3 drawStripe(vec3 color, float from, float to){
+    float noise = getNoise() * 0.1;
+    return color * step(from + noise, vUv.y) * (1.0 - step(to + noise, vUv.y));
+    // float lowerEdge = smoothstep(from + noise - 0.015, from + noise + 0.015, vUv.y);
+    // float upperEdge = 1.0 - smoothstep(to + noise - 0.015, to + noise + 0.015, vUv.y);
+    // return color * lowerEdge * upperEdge;
+}
+
+vec3 drawEllipsis(vec3 baseColor, vec3 ellipseColor, vec2 position, float width, float height) {
+    vec2 dist = vUv - position;
+    float normalizedDistance = (dist.x * dist.x) / (width * width) + (dist.y * dist.y) / (height * height);
+    float noise = getNoise();
+    normalizedDistance += noise * 1.5;
+    float inside = step(normalizedDistance, 1.0);
+    // float inside = smoothstep(normalizedDistance - 0.3, normalizedDistance + 0.3, 1.0);
+    return mix(baseColor, ellipseColor, inside);
+}
+
+void main(){
     vec3 color = vec3(0.0);
 
-    // Series of stripes with unique colors, frequencies, and amplitudes for each stripe's edge
-    color += drawHarmonicWavyStripe(-0.1, 0.2, vec3(0.141, 0.098, 0.153), 0, 0.0, 2, 0.07); // Dark purple-brown
-    color += drawHarmonicWavyStripe(0.2, 0.375, vec3(0.251, 0.102, 0.098), 2, 0.07, 2, 0.03); // Dark reddish-brown
-    color += drawHarmonicWavyStripe(0.375, 0.41, vec3(0.459, 0.220, 0.118), 2, 0.03, 3, 0.05); // Warm brown
-    color += drawHarmonicWavyStripe(0.41, 0.44, vec3(0.518, 0.314, 0.212), 3, 0.05, 1, 0.015); // Earthy brown
-    color += drawHarmonicWavyStripe(0.44, 0.46, vec3(0.537, 0.255, 0.129), 1, 0.015, 4, 0.005); // Deep red-brown
-    color += drawHarmonicWavyStripe(0.46, 0.50, vec3(0.624, 0.224, 0.129), 4, 0.005, 3, 0.025); // Vibrant red-brown
-    color += drawHarmonicWavyStripe(0.50, 0.52, vec3(0.816, 0.541, 0.357) * 0.9, 3, 0.025, 3, 0.025); // Thin orange
-    color += drawHarmonicWavyStripe(0.52, 0.58, vec3(0.725, 0.408, 0.231), 3, 0.025, 1, 0.03); // Warm orange-brown
-    color += drawHarmonicWavyStripe(0.58, 0.59, vec3(0.816, 0.541, 0.357), 1, 0.03, 1, 0.02); // Light orange-brown
-    color += drawHarmonicWavyStripe(0.59, 0.61, vec3(0.918, 0.659, 0.486), 1, 0.02, 5, 0.02); // Pale orange
-    color += drawHarmonicWavyStripe(0.61, 0.66, vec3(0.855, 0.388, 0.161), 5, 0.02, 2, 0.04); // Bright orange-brown
-    color += drawHarmonicWavyStripe(0.66, 0.71, vec3(0.933, 0.498, 0.196), 2, 0.04, 3, 0.06); // Light orange
-    color += drawHarmonicWavyStripe(0.71, 0.75, vec3(0.973, 0.612, 0.294), 3, 0.06, 2, 0.04); // Vibrant light orange
-    color += drawHarmonicWavyStripe(0.75, 0.77, vec3(0.863, 0.361, 0.216), 2, 0.04, 4, 0.015); // Red-orange
-    color += drawHarmonicWavyStripe(0.77, 0.79, vec3(0.988, 0.714, 0.514), 4, 0.015, 2, 0.02); // Light peach-orange
-    color += drawHarmonicWavyStripe(0.79, 0.82, vec3(0.988, 0.773, 0.612), 2, 0.02, 3, 0.05); // Soft peach
-    color += drawHarmonicWavyStripe(0.82, 1.1, vec3(0.965, 0.749, 0.455), 3, 0.05, 0, 0.0); // Light golden
+    // Stripes
+    color += drawStripe(vec3(0.67, 0.71, 0.73), -0.1, 0.1);
+    color += drawStripe(vec3(0.13), 0.1, 0.13);
+    color += drawStripe(vec3(0.494,0.302,0.204), 0.13, 0.18);
+    color += drawStripe(vec3(0.13), 0.18, 0.185);
+    color += drawStripe(vec3(0.74, 0.79, 0.81), 0.185, 0.24);
+    color += drawStripe(vec3(0.596,0.459,0.353), 0.24, 0.26);
+    color += drawStripe(vec3(0.74, 0.79, 0.81), 0.26, 0.29);
+
+    // Stripe containing ellipses
+    color += drawStripe(vec3(0.749,0.722,0.612), 0.29, 0.335);
+    color += drawStripe(vec3(0.659,0.557,0.408), 0.335, 0.38);
+    color += drawStripe(vec3(0.749,0.722,0.612), 0.38, 0.425);
+
+    // Ellipses
+    color = drawEllipsis(color, vec3(0.659,0.557,0.408), vec2(0.5, 0.357), 0.05, 0.05);
+    color = drawEllipsis(color, vec3(0.786, 0.456, 0.230), vec2(0.5, 0.357), 0.039, 0.039);
+    color = drawEllipsis(color, vec3(0.740, 0.354, 0.173), vec2(0.5, 0.357), 0.034, 0.034);
+    color = drawEllipsis(color, vec3(0.595, 0.247, 0.077), vec2(0.5, 0.357), 0.0125, 0.010);
+
+    // Rest of the stripes
+    color += drawStripe(vec3(0.827,0.839,0.796), 0.425, 0.455);
+    color += drawStripe(vec3(0.945,0.941,0.867), 0.455, 0.51);
+    color += drawStripe(vec3(0.89,0.588,0.345), 0.51, 0.525);
+    color += drawStripe(vec3(0.663,0.361,0.2), 0.525, 0.54);
+    color += drawStripe(vec3(0.933,0.78,0.576), 0.54, 0.555);
+    color += drawStripe(vec3(0.576,0.353,0.275), 0.555, 0.58);
+    color += drawStripe(vec3(0.69,0.239,0.11), 0.58, 0.595);
+    color += drawStripe(vec3(0.784,0.478,0.286), 0.595, 0.61);
+    color += drawStripe(vec3(0.91,0.843,0.718), 0.61, 0.62);
+    color += drawStripe(vec3(0.694,0.553,0.408), 0.62, 0.625);
+    color += drawStripe(vec3(0.973,0.925,0.808), 0.625, 0.63);
+    color += drawStripe(vec3(0.957,0.71,0.486), 0.63, 0.635);
+    color += drawStripe(vec3(0.561,0.251,0.153), 0.635, 0.645);
+    color += drawStripe(vec3(0.82,0.89,0.851), 0.645, 0.665);
+    color += drawStripe(vec3(0.784,0.478,0.286), 0.665, 0.68);
+    color += drawStripe(vec3(0.945,0.941,0.867), 0.68, 0.69);
+    color += drawStripe(vec3(0.827,0.671,0.506), 0.69, 0.72);
+    color += drawStripe(vec3(0.914,0.647,0.404), 0.72, 0.755);
+    color += drawStripe(vec3(0.843,0.259,0.149), 0.755, 0.77);
+    color += drawStripe(vec3(0.961,0.878,0.725), 0.77, 0.785);
+    color += drawStripe(vec3(0.98,0.957,0.863), 0.785, 0.795);
+    color += drawStripe(vec3(0.945,0.792,0.624), 0.795, 0.815);
+    color += drawStripe(vec3(0.89,0.631,0.42), 0.815, 0.835);
+    color += drawStripe(vec3(0.914,0.769,0.6), 0.835, 0.87);
+    color += drawStripe(vec3(0.835,0.553,0.376), 0.87, 0.92);
+    color += drawStripe(vec3(0.686,0.412,0.314), 0.92, 1.1);
 
     // Normalize the normal and view direction
     vec3 normal = normalize(vNormal);
@@ -153,8 +143,11 @@ void main() {
     vec3 fresnelColor = vec3(0.2, 0.13, 0.07);
     float fresnelStrength = 2.5;
     float fresnelFactor = pow(1.0 - dot(normal, toCameraDirection), fresnelStrength);
-    vec3 fresnel = fresnelColor * fresnelFactor * 0.5;
+    vec3 fresnel = fresnelColor * fresnelFactor * 0.75;
     color += fresnel;
+
+    // Darken a bit the whole color
+    color = mix(color, vec3(0.0), 0.35);
 
     gl_FragColor = vec4(color, 1.0);
     #include <tonemapping_fragment>
