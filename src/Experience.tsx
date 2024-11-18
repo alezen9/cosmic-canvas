@@ -6,7 +6,7 @@ import { useControls } from "leva";
 const Experience = () => {
   const { isPerformancePanelVisible } = useControls("Monitoring", {
     isPerformancePanelVisible: {
-      value: true,
+      value: false,
       label: "Show performance",
     },
   });
