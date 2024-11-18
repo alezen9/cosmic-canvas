@@ -56,7 +56,7 @@ const Jupiter = () => {
     starfield.current.rotation.y += delta * 0.01;
 
     // planet rotation
-    jupiter.current.rotation.y = time * -0.15;
+    jupiter.current.rotation.y = time * -0.05;
 
     // sunlight
     const sunPosition = new Vector3();

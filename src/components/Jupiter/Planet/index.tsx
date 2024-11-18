@@ -7,7 +7,7 @@ import { useControls } from "leva";
 
 const uniforms = {
   uTime: new Uniform(0),
-  uAnimationSpeed: new Uniform(0.01),
+  uAnimationSpeed: new Uniform(0.1),
   uSunPosition: new Uniform(new Vector3(0)),
   uNoiseDensity: new Uniform(0.5),
   uNoiseIntensity: new Uniform(0.1),
@@ -45,7 +45,7 @@ const Planet = forwardRef<PlanetRef, Props>((props, outerRef) => {
 
   const controls = useControls("Planet", {
     uAnimationSpeed: {
-      value: 0.01,
+      value: 0.1,
       min: -3,
       max: 3,
       step: 0.001,
