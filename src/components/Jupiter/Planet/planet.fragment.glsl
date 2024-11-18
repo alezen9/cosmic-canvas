@@ -77,10 +77,10 @@ void main(){
     color += drawStripe(vec3(0.749,0.722,0.612), 0.38, 0.425);
 
     // Ellipses
-    color = drawEllipsis(color, vec3(0.659,0.557,0.408), vec2(0.5, 0.357), 0.05, 0.05);
-    color = drawEllipsis(color, vec3(0.786, 0.456, 0.230), vec2(0.5, 0.357), 0.039, 0.039);
-    color = drawEllipsis(color, vec3(0.740, 0.354, 0.173), vec2(0.5, 0.357), 0.034, 0.034);
-    color = drawEllipsis(color, vec3(0.595, 0.247, 0.077), vec2(0.5, 0.357), 0.0125, 0.010);
+    color = drawEllipsis(color, vec3(0.659, 0.557, 0.408), vec2(0.75, 0.357), 0.05, 0.05);
+    color = drawEllipsis(color, vec3(0.786, 0.456, 0.230), vec2(0.75, 0.357), 0.039, 0.039);
+    color = drawEllipsis(color, vec3(0.740, 0.354, 0.173), vec2(0.75, 0.357), 0.034, 0.034);
+    color = drawEllipsis(color, vec3(0.595, 0.247, 0.077), vec2(0.75, 0.357), 0.0125, 0.010);
 
     // Rest of the stripes
     color += drawStripe(vec3(0.827,0.839,0.796), 0.425, 0.455);
@@ -123,7 +123,7 @@ void main(){
     
     // Point lighting
     vec3 pointLightColor = vec3(1.0);
-    float pointLightIntensity = 1.0;
+    float pointLightIntensity = 0.75;
     float diffuseFactor = max(dot(normal, toLightDirection), 0.0);
     vec3 pointLight = pointLightColor * diffuseFactor * pointLightIntensity;
     
