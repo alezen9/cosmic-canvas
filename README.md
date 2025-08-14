@@ -11,7 +11,8 @@ The journey has been incredibly rewarding, both in terms of the learning process
 
 # GLSL Jupiter Pattern Shader
 
-![Preview](/public/jupiter-preview.png)
+[![Preview Image](/public/jupiter-preview.png)](https://cosmic-canvas.aleksandargjoreski.dev)
+Click the image above to view the live experience directly!
 
 <br />
 <br />
